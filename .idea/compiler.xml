@@ -7,6 +7,8 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="aws-demo" />
+        <module name="aws-java-demo" />
+        <module name="aws-sqs-spring-boot-demo" />
         <module name="spring-common-demo" />
         <module name="sqsdemo" />
       </profile>
@@ -14,8 +16,11 @@
     <bytecodeTargetLevel>
       <module name="aws-client" target="1.5" />
       <module name="aws-demo" target="1.8" />
+      <module name="aws-java-demo" target="1.8" />
       <module name="aws-sqs-demo" target="1.8" />
+      <module name="aws-sqs-spring-boot-demo" target="1.8" />
       <module name="eureka-server" target="1.8" />
+      <module name="multiple-demo" target="1.5" />
       <module name="multipledemo" target="1.5" />
       <module name="spring-common-demo" target="1.8" />
       <module name="springclouddemo" target="1.5" />
