@@ -3,10 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/aws-demo/aws-demo.iml" filepath="$PROJECT_DIR$/aws-demo/aws-demo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/aws-sqs-demo/sqsdemo.iml" filepath="$PROJECT_DIR$/aws-sqs-demo/sqsdemo.iml" />
       <module fileurl="file://$PROJECT_DIR$/aws-sqs-demo/aws-sqs-demo.iml" filepath="$PROJECT_DIR$/aws-sqs-demo/aws-sqs-demo.iml" />
       <module fileurl="file://$PROJECT_DIR$/multipledemo.iml" filepath="$PROJECT_DIR$/multipledemo.iml" />
       <module fileurl="file://$PROJECT_DIR$/spring-common-demo/spring-common-demo.iml" filepath="$PROJECT_DIR$/spring-common-demo/spring-common-demo.iml" />
-      <module fileurl="file://$PROJECT_DIR$/sqsdemo/sqsdemo.iml" filepath="$PROJECT_DIR$/sqsdemo/sqsdemo.iml" />
     </modules>
   </component>
 </project>
