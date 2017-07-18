@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/aws-demo/aws-demo.iml" filepath="$PROJECT_DIR$/aws-demo/aws-demo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/aws-sqs-demo/aws-sqs-demo.iml" filepath="$PROJECT_DIR$/aws-sqs-demo/aws-sqs-demo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/multipledemo.iml" filepath="$PROJECT_DIR$/multipledemo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spring-common-demo/spring-common-demo.iml" filepath="$PROJECT_DIR$/spring-common-demo/spring-common-demo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sqsdemo/sqsdemo.iml" filepath="$PROJECT_DIR$/sqsdemo/sqsdemo.iml" />
+    </modules>
+  </component>
+</project>
