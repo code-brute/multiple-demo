@@ -4,6 +4,7 @@ import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.CreateQueueRequest;
 import com.amazonaws.services.sqs.model.ListQueuesResult;
 import com.amazonaws.services.sqs.model.Message;
+import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.ReceiveMessageResult;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
 import com.amazonaws.services.sqs.model.SendMessageResult;
@@ -12,6 +13,7 @@ import com.google.common.collect.Lists;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -102,6 +104,7 @@ public class SqsQueueServiceImpl implements SqsQueueService{
   
   @Override
   public List<String> receiveMessage() {
+    // 一种写法
     List<String> messageList = Lists.newArrayList();
     ReceiveMessageResult r = amazonSQS.receiveMessage(queueUrl);
     System.out.println(r);
@@ -110,6 +113,23 @@ public class SqsQueueServiceImpl implements SqsQueueService{
       System.out.println(message);
       messageList.add(message);
     }
+    // 第二种写法
+    System.out.println("Receiving messages from MyQueue.\n");
+    ReceiveMessageRequest receiveMessageRequest = new ReceiveMessageRequest(fifoQueueUrl);
+    List<Message> messages = amazonSQS.receiveMessage(receiveMessageRequest).getMessages();
+    for (Message message : messages) {
+      System.out.println("  Message");
+      System.out.println("    MessageId:     " + message.getMessageId());
+      System.out.println("    ReceiptHandle: " + message.getReceiptHandle());
+      System.out.println("    MD5OfBody:     " + message.getMD5OfBody());
+      System.out.println("    Body:          " + message.getBody());
+      for (Entry<String, String> entry : message.getAttributes().entrySet()) {
+        System.out.println("  Attribute");
+        System.out.println("    Name:  " + entry.getKey());
+        System.out.println("    Value: " + entry.getValue());
+      }
+    }
+    System.out.println();
     return messageList;
   }
 }

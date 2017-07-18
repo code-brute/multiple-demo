@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Created by Jackson on 2017/7/17.
  */
 @RestController
-@RequestMapping(value = "/api/aws")
+@RequestMapping(value = "/api/aws/")
 public class SqsQueueResource {
   
   
@@ -36,16 +36,15 @@ public class SqsQueueResource {
   }
   
   @RequestMapping(
-      value = "Queues",
+      value = "queues",
       method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public List<String>  deleteQueues() {
     return sqsQueueService.deleteQueues();
   }
   
-  @RequestMapping(value = "Queues",
-      method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @RequestMapping(value = "queues",
+      method = RequestMethod.GET)
   public List<String> getListQueues() {
     return sqsQueueService.getListQueues();
   }
@@ -67,8 +66,7 @@ public class SqsQueueResource {
   }
   
   @RequestMapping(value = "receives",
-      method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+      method = RequestMethod.GET)
   public List<String> receiveMessage() {
     return sqsQueueService.receiveMessage();
   }
