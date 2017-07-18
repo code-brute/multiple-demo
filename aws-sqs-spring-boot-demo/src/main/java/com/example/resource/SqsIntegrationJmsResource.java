@@ -32,4 +32,12 @@ public class SqsIntegrationJmsResource {
   public String createStandardQueue() {
     return sqsIntegrationJmsService.createStandardQueue();
   }
+  
+  @RequestMapping(
+      value = "jms/standardMessage",
+      method = RequestMethod.POST,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public void standSendMessage() {
+    sqsIntegrationJmsService.standSendMessage();
+  }
 }

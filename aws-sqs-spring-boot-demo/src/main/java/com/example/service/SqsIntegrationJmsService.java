@@ -11,4 +11,6 @@ public interface SqsIntegrationJmsService {
   String createFifoQueue();
   
   String createStandardQueue();
+  
+  void standSendMessage();
 }

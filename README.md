@@ -31,3 +31,8 @@
    - 重要
    如果多次接收某条消息，则每次接收该消息时，您都会获得不同的接收句柄。在请求删除该消息时，您必须提供最近收到的接收句柄 (否则，可能无法删除该消息)。
      
+# 问题
+ - java.lang.NoSuchMethodError: com.amazonaws.services.sqs.AmazonSQS.deleteMessage 
+  这个是因为amazon-sqs-java-messaging-lib 版本过低导致的，请使用最新的1.0.3 版本，要不就将
+  aws-java-sdk-sqs 版本将为 1.9.6
+  

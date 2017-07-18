@@ -5,11 +5,18 @@ import com.amazon.sqs.javamessaging.SQSConnection;
 import com.amazon.sqs.javamessaging.SQSConnectionFactory;
 import com.amazonaws.services.sqs.model.CreateQueueRequest;
 import com.amazonaws.services.sqs.model.CreateQueueResult;
+import com.example.domain.JmsMessageListener;
 import com.example.service.SqsIntegrationJmsService;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
+import javax.jms.Queue;
+import javax.jms.Session;
+import javax.jms.TextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +26,7 @@ import org.springframework.stereotype.Service;
  * Created by Jackson on 2017/7/18.
  */
 @Service
-public class SqsIntegrationJmsServiceImpl implements SqsIntegrationJmsService{
+public class SqsIntegrationJmsServiceImpl implements SqsIntegrationJmsService {
   
   Logger logger = LoggerFactory.getLogger(SqsIntegrationJmsServiceImpl.class);
   
@@ -29,7 +36,6 @@ public class SqsIntegrationJmsServiceImpl implements SqsIntegrationJmsService{
   /**
    * 如果您使用 getWrappedAmazonSQSClient，则返回的客户端对象会将所有异常转变成 JMS 异常。
    * 果您使用 getAmazonSQSClient，则这些异常将为 Amazon SQS 异常。
-   * @return
    */
   @Override
   public String createFifoQueue() {
@@ -53,7 +59,7 @@ public class SqsIntegrationJmsServiceImpl implements SqsIntegrationJmsService{
       }
     } catch (JMSException e) {
       logger.error(e.getMessage(), e);
-    }finally {
+    } finally {
       closeConnection(connection);
     }
     return queueUrl;
@@ -61,22 +67,84 @@ public class SqsIntegrationJmsServiceImpl implements SqsIntegrationJmsService{
   
   @Override
   public String createStandardQueue() {
-   CreateQueueResult createQueueResult;
-   SQSConnection sqsConnection = null;
-   String queueUrl = null;
+    CreateQueueResult createQueueResult;
+    SQSConnection sqsConnection = null;
+    String queueUrl = null;
     try {
       sqsConnection = sqsConnectionFactory.createConnection();
-      AmazonSQSMessagingClientWrapper amazonSQS =  sqsConnection.getWrappedAmazonSQSClient();
+      AmazonSQSMessagingClientWrapper amazonSQS = sqsConnection.getWrappedAmazonSQSClient();
       if (!amazonSQS.queueExists("TestQueueStand")) {
         createQueueResult = amazonSQS.createQueue(new CreateQueueRequest().withQueueName("TestQueueStand"));
         queueUrl = createQueueResult.getQueueUrl();
       }
     } catch (JMSException e) {
-      logger.error(e.getMessage(),e);
-    }finally {
+      logger.error(e.getMessage(), e);
+    } finally {
       closeConnection(sqsConnection);
     }
     return queueUrl;
+  }
+  
+  @Override
+  public void standSendMessage(){
+    SQSConnection sqsConnection = null;
+    try {
+      sqsConnection = sqsConnectionFactory.createConnection();
+      //将创建一个具有 AUTO_ACKNOWLEDGE 模式的非事务性 JMS 会话。
+      Session session = sqsConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      // 为了向队列发送文本消息，将创建一个 JMS 队列标识和消息创建者。
+      // Create a queue identity with name 'TestQueue' in the session
+      Queue queue = session.createQueue("TestQueueStand");
+      
+      //Create a producer for the 'TestQueue'.
+      MessageProducer producer = session.createProducer(queue);
+      //创建文本消息并将它发送到队列。
+      //create the text message.
+      TextMessage textMessage = session.createTextMessage("Hello World");
+      // Send the message.
+      producer.send(textMessage);
+      logger.info("JMS Message " + textMessage.getJMSMessageID());
+      
+      //同步接收消息
+      // syncReceiveMessage(sqsConnection, session, queue);
+      //异步接收消息
+      asyncReceiveMessage(sqsConnection, session, queue);
+  
+    } catch (JMSException e) {
+      logger.error(e.getMessage(), e);
+    } catch (InterruptedException e) {
+      logger.error(e.getMessage(),e);
+    } finally {
+      closeConnection(sqsConnection);
+    }
+  }
+  
+  private void asyncReceiveMessage(SQSConnection sqsConnection, Session session, Queue queue) throws JMSException, InterruptedException {
+    // 对 receive 实现实例设置使用者消息监听器，而不是对使用者显式调用 MyListener 方法。主线程会睡眠一秒钟。
+    // Create a consumer for the 'TestQueue'.
+    MessageConsumer consumer = session.createConsumer(queue);
+    // Instantiate and set the message listener for the consumer.
+    consumer.setMessageListener(new JmsMessageListener());
+    // Start receiving incoming messages.
+    sqsConnection.start();
+    // Wait for 1 second. The listener onMessage() method will be invoked when a message is received.
+    Thread.sleep(1000);
+  }
+  
+  private void syncReceiveMessage(SQSConnection sqsConnection, Session session, Queue queue) throws JMSException {
+    // 同步接收消息
+    // Create a consumer for the 'TestQueue'.
+    MessageConsumer consumer = session.createConsumer(queue);
+    
+    // Start receiving incoming messages.
+    sqsConnection.start();
+    // Receive a message from 'TestQueue' and wait up to 1 second
+    Message receivedMessage = consumer.receive(1000);
+    // Cast the received message as TextMessage and print the text to screen.
+    if (receivedMessage != null) {
+      logger.info("============");
+      logger.info("Received: " + ((TextMessage) receivedMessage).getText());
+    }
   }
   
   private void closeConnection(SQSConnection sqsConnection) {
@@ -84,7 +152,7 @@ public class SqsIntegrationJmsServiceImpl implements SqsIntegrationJmsService{
       try {
         sqsConnection.close();
       } catch (JMSException e) {
-        logger.error(e.getMessage(),e);
+        logger.error(e.getMessage(), e);
       }
     }
   }
