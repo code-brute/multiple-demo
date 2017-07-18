@@ -22,5 +22,11 @@ public interface SqsQueueService {
   
   String sendFifoMessage();
   
-  List<String> receiveMessage();
+  List<String> standReceiveMessage();
+  
+  String standDeleteMessage();
+  
+  List<String> fifoReceiveMessage();
+  
+  List<String> fifoDeleteMessage();
 }

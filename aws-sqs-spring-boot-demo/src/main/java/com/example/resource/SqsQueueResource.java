@@ -65,10 +65,31 @@ public class SqsQueueResource {
     return sqsQueueService.sendFifoMessage();
   }
   
-  @RequestMapping(value = "receives",
-      method = RequestMethod.GET)
-  public List<String> receiveMessage() {
-    return sqsQueueService.receiveMessage();
+  @RequestMapping(value = "standMessage",
+      method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<String> standReceiveMessage() {
+    return sqsQueueService.standReceiveMessage();
+  }
+  
+  @RequestMapping(value = "standMessage",
+      method = RequestMethod.DELETE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public String standDeleteMessage() {
+    return sqsQueueService.standDeleteMessage();
+  }
+  @RequestMapping(value = "fifoMessage",
+      method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<String> fifoReceiveMessage() {
+    return sqsQueueService.fifoReceiveMessage();
+  }
+  
+  @RequestMapping(value = "fifoMessage",
+      method = RequestMethod.DELETE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<String> fifoDeleteMessage() {
+    return sqsQueueService.fifoDeleteMessage();
   }
   
 }
