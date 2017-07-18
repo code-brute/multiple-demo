@@ -12,5 +12,7 @@ public interface SqsIntegrationJmsService {
   
   String createStandardQueue();
   
-  void standSendMessage();
+  void standSendMessageAndAutoAndSync();
+  
+  void standSendMessageAndClientAndSync();
 }

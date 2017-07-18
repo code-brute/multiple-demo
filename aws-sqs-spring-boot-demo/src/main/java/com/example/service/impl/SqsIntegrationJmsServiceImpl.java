@@ -86,7 +86,7 @@ public class SqsIntegrationJmsServiceImpl implements SqsIntegrationJmsService {
   }
   
   @Override
-  public void standSendMessage(){
+  public void standSendMessageAndAutoAndSync() {
     SQSConnection sqsConnection = null;
     try {
       sqsConnection = sqsConnectionFactory.createConnection();
@@ -106,14 +106,46 @@ public class SqsIntegrationJmsServiceImpl implements SqsIntegrationJmsService {
       logger.info("JMS Message " + textMessage.getJMSMessageID());
       
       //同步接收消息
-      // syncReceiveMessage(sqsConnection, session, queue);
+      syncReceiveMessage(sqsConnection, session, queue);
+      //异步接收消息
+      // asyncReceiveMessage(sqsConnection, session, queue);
+      
+    } catch (JMSException e) {
+      logger.error(e.getMessage(), e);
+    } finally {
+      closeConnection(sqsConnection);
+    }
+  }
+  
+  @Override
+  public void standSendMessageAndClientAndSync() {
+    SQSConnection sqsConnection = null;
+    try {
+      sqsConnection = sqsConnectionFactory.createConnection();
+      //将创建一个具有 具有 CLIENT_ACKNOWLEDGE 模式的会话 客户端显示的确认
+      //在此模式下，当确认某条消息时，也会隐式确认在该消息之前收到的所有消息。
+      // 例如，如果收到 10 条消息，
+      // 则仅确认第 10 条消息 (按接收消息的顺序)，然后确认先前的所有 9 条消息。
+      Session session = sqsConnection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
+      // 为了向队列发送文本消息，将创建一个 JMS 队列标识和消息创建者。
+      // Create a queue identity with name 'TestQueue' in the session
+      Queue queue = session.createQueue("TestQueueStand");
+      
+      //Create a producer for the 'TestQueue'.
+      MessageProducer producer = session.createProducer(queue);
+      //创建文本消息并将它发送到队列。
+      //create the text message.
+      TextMessage textMessage = session.createTextMessage("Hello World");
+      // Send the message.
+      producer.send(textMessage);
+      logger.info("JMS Message " + textMessage.getJMSMessageID());
       //异步接收消息
       asyncReceiveMessage(sqsConnection, session, queue);
-  
+      
     } catch (JMSException e) {
       logger.error(e.getMessage(), e);
     } catch (InterruptedException e) {
-      logger.error(e.getMessage(),e);
+      logger.error(e.getMessage(), e);
     } finally {
       closeConnection(sqsConnection);
     }

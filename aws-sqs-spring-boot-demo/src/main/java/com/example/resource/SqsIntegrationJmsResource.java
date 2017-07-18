@@ -34,10 +34,18 @@ public class SqsIntegrationJmsResource {
   }
   
   @RequestMapping(
-      value = "jms/standardMessage",
+      value = "jms/syncStandardMessage",
       method = RequestMethod.POST,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public void standSendMessage() {
-    sqsIntegrationJmsService.standSendMessage();
+  public void standSendMessageAndAutoAndSync() {
+    sqsIntegrationJmsService.standSendMessageAndAutoAndSync();
+  }
+  
+  @RequestMapping(
+      value = "jms/asyncStandardMessage",
+      method = RequestMethod.POST,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public void standSendMessageAndClientAndAsync() {
+    sqsIntegrationJmsService.standSendMessageAndClientAndSync();
   }
 }
