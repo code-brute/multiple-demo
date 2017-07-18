@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @EnableAutoConfiguration
-public class AwsSqsConfig {
+public class AwsSqsConfiguration {
   private static final String accessKey = "AKIAJK5HYPF27XUV6KFQ";
   private static final String accessSecret = "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";
   
@@ -26,6 +26,5 @@ public class AwsSqsConfig {
         .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
         .withRegion(Regions.US_EAST_2)
         .build();
-    // return new AmazonSQSClient(awsCredentials);
   }
 }

@@ -92,4 +92,10 @@ public class SqsQueueResource {
     return sqsQueueService.fifoDeleteMessage();
   }
   
+  @RequestMapping(value = "numberOfMessage",
+      method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<Integer> getNumberOfMessages() {
+    return sqsQueueService.getNumberOfMessages();
+  }
 }

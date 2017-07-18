@@ -29,4 +29,6 @@ public interface SqsQueueService {
   List<String> fifoReceiveMessage();
   
   List<String> fifoDeleteMessage();
+  
+  List<Integer> getNumberOfMessages();
 }
