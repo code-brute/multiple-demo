@@ -135,7 +135,7 @@ public class SqsIntegrationJmsServiceImpl implements SqsIntegrationJmsService {
       MessageProducer producer = session.createProducer(queue);
       //创建文本消息并将它发送到队列。
       //create the text message.
-      TextMessage textMessage = session.createTextMessage("Hello World");
+      TextMessage textMessage = session.createTextMessage("Hello World 2");
       // Send the message.
       producer.send(textMessage);
       logger.info("JMS Message " + textMessage.getJMSMessageID());

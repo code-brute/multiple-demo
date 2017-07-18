@@ -23,7 +23,8 @@ public class JmsMessageListener  implements MessageListener {
         //在此模式下，当确认某条消息时，也会隐式确认在该消息之前收到的所有消息。
         // 例如，如果收到 10 条消息，
         // 则仅确认第 10 条消息 (按接收消息的顺序)，然后确认先前的所有 9 条消息。
-        message.acknowledge();//收到消息时，显示消息，然后显式确认消息。
+        message.acknowledge();//收到消息时，显示消息，然后显式确认消息。显示的确认消息后，消息才会被删除
+        logger.info("Async {}",message.getJMSMessageID());
       }
     } catch (JMSException e) {
       logger.error(e.getMessage(),e);
