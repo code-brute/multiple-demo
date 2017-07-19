@@ -199,6 +199,8 @@ public class SqsQueueServiceImpl implements SqsQueueService{
   
   @Override
   public List<Integer> getNumberOfMessages() {
+    
     return null;
   }
+  
 }
