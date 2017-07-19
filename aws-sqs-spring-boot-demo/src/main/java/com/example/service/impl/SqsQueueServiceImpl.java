@@ -15,7 +15,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 /**
@@ -183,24 +185,62 @@ public class SqsQueueServiceImpl implements SqsQueueService{
   
   @Override
   public List<String> fifoDeleteMessage() {
-    // Delete the message
-    List<String> messageList = Lists.newArrayList();
-    System.out.println("Deleting the message.\n");
-    ReceiveMessageRequest receiveMessageRequest = new ReceiveMessageRequest(fifoQueueUrl);
-    List<Message> messages = amazonSQS.receiveMessage(receiveMessageRequest).getMessages();
-    for (Message message : messages) {
-      messageList.add(message.getMessageId() + message.getBody());
-      String messageReceiptHandle = message.getReceiptHandle();
-      amazonSQS.deleteMessage(new DeleteMessageRequest().withQueueUrl(fifoQueueUrl).withReceiptHandle(messageReceiptHandle));
-    }
-    
-    return messageList;
+    // // Delete the message
+    // List<String> messageList = Lists.newArrayList();
+    // System.out.println("Deleting the message.\n");
+    // ReceiveMessageRequest receiveMessageRequest = new ReceiveMessageRequest(fifoQueueUrl);
+    // List<Message> messages = amazonSQS.receiveMessage(receiveMessageRequest).getMessages();
+    // for (Message message : messages) {
+    //   messageList.add(message.getMessageId() + message.getBody());
+    //   String messageReceiptHandle = message.getReceiptHandle();
+    //   amazonSQS.deleteMessage(new DeleteMessageRequest().withQueueUrl(fifoQueueUrl).withReceiptHandle(messageReceiptHandle));
+    // }
+    //
+    // return messageList;
+    test2();
+    return null;
   }
   
   @Override
   public List<Integer> getNumberOfMessages() {
+    test1();
     
     return null;
+  }
+  
+ 
+  private void sleep() {
+    try {
+      Thread.sleep(10);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
+  
+  @Async
+  private void test2() {
+    for(int n = 0 ; n < 10000; n++) {
+      System.out.println("test2"+DateTime.now());
+      System.out.println("test2 Receiving messages from MyFifoQueue.fifo.\n"+n);
+      common();
+    }
+  }
+  
+  @Async
+  private void test1() {
+    for(int n = 0 ; n < 10000; n++) {
+      System.out.println("test1+"+DateTime.now());
+      System.out.println("test1 Receiving messages from MyFifoQueue.fifo.\n"+n);
+      common();
+    }
+  }
+  
+  private void common() {
+    String url = amazonSQS.createQueue("TestQueueStand").getQueueUrl();
+    ReceiveMessageRequest receiveMessageRequest = new ReceiveMessageRequest(url);
+    List<Message> messages = amazonSQS.receiveMessage(receiveMessageRequest).getMessages();
+    this.parseMessages(messages);
+    sleep();
   }
   
 }
