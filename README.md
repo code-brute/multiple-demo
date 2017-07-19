@@ -35,4 +35,5 @@
  - java.lang.NoSuchMethodError: com.amazonaws.services.sqs.AmazonSQS.deleteMessage 
   这个是因为amazon-sqs-java-messaging-lib 版本过低导致的，请使用最新的1.0.3 版本，要不就将
   aws-java-sdk-sqs 版本将为 1.9.6
-  
+- 注意
+  Amazon SQS Java Message Service (JMS) 客户端当前不支持 FIFO 队列。

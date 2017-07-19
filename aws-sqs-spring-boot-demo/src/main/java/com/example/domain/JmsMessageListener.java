@@ -19,6 +19,7 @@ public class JmsMessageListener  implements MessageListener {
     try {
       // Cast the received message as TextMessage and print the text to screen.
       if (message != null) {
+        logger.info("=============="+message.getStringProperty("test"));
         logger.info("Async Received: " + ((TextMessage) message).getText());
         //在此模式下，当确认某条消息时，也会隐式确认在该消息之前收到的所有消息。
         // 例如，如果收到 10 条消息，

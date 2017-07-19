@@ -101,10 +101,12 @@ public class SqsIntegrationJmsServiceImpl implements SqsIntegrationJmsService {
       //创建文本消息并将它发送到队列。
       //create the text message.
       TextMessage textMessage = session.createTextMessage("Hello World");
+      textMessage.setStringProperty("3","e");
+      
       // Send the message.
       producer.send(textMessage);
       logger.info("JMS Message " + textMessage.getJMSMessageID());
-      
+      logger.info(textMessage.getStringProperty("3"));
       //同步接收消息
       syncReceiveMessage(sqsConnection, session, queue);
       //异步接收消息
@@ -131,13 +133,15 @@ public class SqsIntegrationJmsServiceImpl implements SqsIntegrationJmsService {
       // Create a queue identity with name 'TestQueue' in the session
       Queue queue = session.createQueue("TestQueueStand");
       
+      
       //Create a producer for the 'TestQueue'.
       MessageProducer producer = session.createProducer(queue);
       //创建文本消息并将它发送到队列。
       //create the text message.
       TextMessage textMessage = session.createTextMessage("Hello World");
+      textMessage.setStringProperty("test","33333");
       // Send the message.
-      // textMessage.setJMSMessageID("11111"); TODO 未生效 不明白
+      textMessage.setJMSMessageID("1234567890"); // TODO 未生效 不明白
       producer.send(textMessage);
       logger.info("JMS Message " + textMessage.getJMSMessageID());
       //异步接收消息
@@ -175,7 +179,7 @@ public class SqsIntegrationJmsServiceImpl implements SqsIntegrationJmsService {
     Message receivedMessage = consumer.receive(1000);
     // Cast the received message as TextMessage and print the text to screen.
     if (receivedMessage != null) {
-      logger.info("============");
+      logger.info("============"+receivedMessage.getStringProperty("3"));
       logger.info("Received: " + ((TextMessage) receivedMessage).getText());
     }
   }
