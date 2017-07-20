@@ -7,6 +7,8 @@ import com.amazonaws.services.sqs.model.ListQueuesResult;
 import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.ReceiveMessageResult;
+import com.amazonaws.services.sqs.model.SendMessageBatchRequest;
+import com.amazonaws.services.sqs.model.SendMessageBatchRequestEntry;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
 import com.amazonaws.services.sqs.model.SendMessageResult;
 import com.example.service.SqsQueueService;
@@ -16,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -26,6 +30,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class SqsQueueServiceImpl implements SqsQueueService{
   
+  Logger logger = LoggerFactory.getLogger(SqsQueueServiceImpl.class);
+  
   @Autowired
   AmazonSQS amazonSQS;
   
@@ -35,12 +41,15 @@ public class SqsQueueServiceImpl implements SqsQueueService{
   @Override
   public String createFifoQueue() {
     // Create a FIFO queue
-    System.out.println("Creating a new Amazon SQS FIFO queue called MyFifoQueue.fifo.\n");
+    logger.info("Creating a new Amazon SQS FIFO queue called MyFifoQueue.fifo.\n");
     Map<String, String> attributes = new HashMap<String, String>();
     // A FIFO queue must have the FifoQueue attribute set to True
-    attributes.put("FifoQueue", "true");
+    attributes.put("FifoQueue", "true");// 将队列指定为FIFO Queue 您只能在创建队列时提供此属性。您不能更改现有队列。设置此属性时，还必须MessageGroupId明确提供您的消息。
     // Generate a MessageDeduplicationId based on the content, if the user doesn't provide a MessageDeduplicationId
-    attributes.put("ContentBasedDeduplication", "true");
+    attributes.put("ContentBasedDeduplication", "true");// 使用消息正文的SH-256 哈希值(但不是消息的属性)来生成基于消息内容的重复数据的删除ID
+    // 在此属性和 发送消息时指定的重复数据id冲突时以 指定的为准
+    
+    // 其他属性 和 标准队列的属性一样
     // The FIFO queue name must end with the .fifo suffix
     CreateQueueRequest createQueueRequest = new CreateQueueRequest("MyFifoQueue.fifo").withAttributes(attributes);
     return amazonSQS.createQueue(createQueueRequest).getQueueUrl();
@@ -49,8 +58,20 @@ public class SqsQueueServiceImpl implements SqsQueueService{
   @Override
   public String createStandardQueue() {
     // Create a queue
-    System.out.println("Creating a new SQS queue called MyQueue.\n");
-    CreateQueueRequest createQueueRequest = new CreateQueueRequest().withQueueName("MyQueue-jackson");
+    logger.info("Creating a new SQS queue called MyQueue.\n");
+    Map<String, String> attributes = new HashMap<>();
+    // 队列设置 以下这些设置 在AWS控制台皆可以看见和配置
+    // 标准队列详细信息 请看http://docs.aws.amazon.com/zh_cn/AWSSimpleQueueService/latest/APIReference/API_CreateQueue.html
+    attributes.put("DelaySeconds", "20");// 设置交付延时 有效值：0到900秒（15分钟）的整数。默认值为0（零）
+    attributes.put("MessageRetentionPeriod", "60");// 设置消息保留周期  值必须在 1 分钟至 14 天之间 默认值为345600 (4day)
+    attributes.put("ReceiveMessageWaitTimeSeconds","10");//设置接收消息等待时间 动作等待消息到达的时间长度（以秒为单位）。有效值：0到20（秒）之间的整数。默认值为0（零）
+    attributes.put("MaximumMessageSize","256");//设置最大消息大小 值必须在 1 至 256 KB 之间。默认值是256
+    attributes.put("VisibilityTimeout","40");//队列的可见性超时。有效值：从0到43,400（12小时）的整数。默认值为30.
+    //死信队列设置
+    attributes.put("RedrivePolicy", "true");// 在超过最大
+    attributes.put("deadLetterTargetArn", "TestQueueStand");// 消息发往的队列，死信队列的名称
+    attributes.put("maxReceiveCount", "10");//将消息发往死信队列之前允许接收该消息的最大次数 值必须在 1 至 1000 之间。
+    CreateQueueRequest createQueueRequest = new CreateQueueRequest().withQueueName("MyQueue-jackson").withAttributes(attributes);
     return amazonSQS.createQueue(createQueueRequest).getQueueUrl();
   }
   
@@ -83,6 +104,11 @@ public class SqsQueueServiceImpl implements SqsQueueService{
   public SendMessageResult sendStandMessage() {
     // Send a message
     System.out.println("Sending a message to MyQueue.\n");
+    SendMessageBatchRequest sendMessageBatchRequest = new SendMessageBatchRequest().withEntries(new SendMessageBatchRequestEntry()
+        .withMessageBody("223323").withId("61")
+    ).withEntries(new SendMessageBatchRequestEntry()
+        .withMessageBody("223323").withId("6")).withQueueUrl(queueUrl);
+    amazonSQS.sendMessageBatch(sendMessageBatchRequest);
     return amazonSQS.sendMessage(new SendMessageRequest()
         .withQueueUrl(queueUrl)
         .withMessageBody("This is my message text."));
@@ -185,29 +211,19 @@ public class SqsQueueServiceImpl implements SqsQueueService{
   
   @Override
   public List<String> fifoDeleteMessage() {
-    // // Delete the message
-    // List<String> messageList = Lists.newArrayList();
-    // System.out.println("Deleting the message.\n");
-    // ReceiveMessageRequest receiveMessageRequest = new ReceiveMessageRequest(fifoQueueUrl);
-    // List<Message> messages = amazonSQS.receiveMessage(receiveMessageRequest).getMessages();
-    // for (Message message : messages) {
-    //   messageList.add(message.getMessageId() + message.getBody());
-    //   String messageReceiptHandle = message.getReceiptHandle();
-    //   amazonSQS.deleteMessage(new DeleteMessageRequest().withQueueUrl(fifoQueueUrl).withReceiptHandle(messageReceiptHandle));
-    // }
-    //
-    // return messageList;
-    test2();
-    return null;
+    // Delete the message
+    List<String> messageList = Lists.newArrayList();
+    System.out.println("Deleting the message.\n");
+    ReceiveMessageRequest receiveMessageRequest = new ReceiveMessageRequest(fifoQueueUrl);
+    List<Message> messages = amazonSQS.receiveMessage(receiveMessageRequest).getMessages();
+    for (Message message : messages) {
+      messageList.add(message.getMessageId() + message.getBody());
+      String messageReceiptHandle = message.getReceiptHandle();
+      amazonSQS.deleteMessage(new DeleteMessageRequest().withQueueUrl(fifoQueueUrl).withReceiptHandle(messageReceiptHandle));
+    }
+    return messageList;
   }
-  
-  @Override
-  public List<Integer> getNumberOfMessages() {
-    test1();
-    
-    return null;
-  }
-  
+
  
   private void sleep() {
     try {
@@ -218,7 +234,7 @@ public class SqsQueueServiceImpl implements SqsQueueService{
   }
   
   @Async
-  private void test2() {
+  public void test2Message() {
     for(int n = 0 ; n < 10000; n++) {
       System.out.println("test2"+DateTime.now());
       System.out.println("test2 Receiving messages from MyFifoQueue.fifo.\n"+n);
@@ -227,7 +243,7 @@ public class SqsQueueServiceImpl implements SqsQueueService{
   }
   
   @Async
-  private void test1() {
+  public void test1Message() {
     for(int n = 0 ; n < 10000; n++) {
       System.out.println("test1+"+DateTime.now());
       System.out.println("test1 Receiving messages from MyFifoQueue.fifo.\n"+n);

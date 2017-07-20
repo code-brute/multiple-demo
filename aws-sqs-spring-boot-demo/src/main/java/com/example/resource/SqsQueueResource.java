@@ -92,10 +92,18 @@ public class SqsQueueResource {
     return sqsQueueService.fifoDeleteMessage();
   }
   
-  @RequestMapping(value = "numberOfMessage",
+  @RequestMapping(value = "test1Message",
       method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<Integer> getNumberOfMessages() {
-    return sqsQueueService.getNumberOfMessages();
+  public void test1Message() {
+    sqsQueueService.test1Message();
   }
+  
+  @RequestMapping(value = "test2Message",
+      method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public void test2Message() {
+    sqsQueueService.test2Message();
+  }
+  
 }

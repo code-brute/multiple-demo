@@ -30,5 +30,7 @@ public interface SqsQueueService {
   
   List<String> fifoDeleteMessage();
   
-  List<Integer> getNumberOfMessages();
+  
+  void test2Message();
+  
 }
